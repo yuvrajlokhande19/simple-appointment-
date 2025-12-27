@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | MediCare</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --gray: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #f1f5f9;
+            min-height: 100vh;
+            color: var(--dark);
+        }
+
+        /* Header */
+        .dashboard-header {
+            background: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left h1 {
+            color: var(--dark);
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .welcome-text {
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 24px;
+        }
+
+        .stat-total .stat-icon {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+        }
+
+        .stat-confirmed .stat-icon {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--secondary);
+        }
+
+        .stat-pending .stat-icon {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .stat-cancelled .stat-icon {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .stat-card h3 {
+            color: var(--gray);
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .count {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        /* Controls */
+        .controls {
+            padding: 0 40px 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+        }
+
+        .filter-select {
+            padding: 12px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            min-width: 200px;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Table */
+        .table-container {
+            background: white;
+            margin: 0 40px 40px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        thead {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        th {
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f1f1f1;
+            transition: background 0.3s;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        td {
+            padding: 15px;
+            color: var(--dark);
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-confirmed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, var(--secondary) 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-cancel {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: var(--dark);
+        }
+
+        .modal-body p {
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .modal-body strong {
+            color: var(--dark);
+            min-width: 150px;
+            display: inline-block;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, var(--secondary) 0%, #059669 100%);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 20px;
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .stats-container, .controls, .table-container {
+                padding: 20px;
+                margin: 0;
+            }
+            
+            .search-box {
+                min-width: 100%;
+            }
+            
+            .filter-select {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-left">
+            <h1><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
+        </div>
+        <div class="header-right">
+            <span class="welcome-text">Welcome, Admin</span>
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats-container">
+        <div class="stat-card stat-total">
+            <div class="stat-icon">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <h3>Total Appointments</h3>
+            <div class="count" id="totalCount">0</div>
+        </div>
+        
+        <div class="stat-card stat-confirmed">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>Confirmed</h3>
+            <div class="count" id="confirmedCount">0</div>
+        </div>
+        
+        <div class="stat-card stat-pending">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <h3>Pending</h3>
+            <div class="count" id="pendingCount">0</div>
+        </div>
+        
+        <div class="stat-card stat-cancelled">
+            <div class="stat-icon">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <h3>Cancelled</h3>
+            <div class="count" id="cancelledCount">0</div>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="searchInput" placeholder="Search by name, email, or appointment ID...">
+        </div>
+        
+        <select class="filter-select" id="statusFilter">
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="cancelled">Cancelled</option>
+        </select>
+        
+        <select class="filter-select" id="doctorFilter">
+            <option value="all">All Doctors</option>
+            <option value="dr-sharma">Dr. Rajesh Sharma</option>
+            <option value="dr-patel">Dr. Priya Patel</option>
+            <option value="dr-kumar">Dr. Amit Kumar</option>
+            <option value="dr-singh">Dr. Neha Singh</option>
+        </select>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Appointment ID</th>
+                    <th>Patient Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Doctor</th>
+                    <th>Date & Time</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="appointmentsTable">
+                <!-- Data will be inserted here -->
+            </tbody>
+        </table>
+        
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <i class="fas fa-calendar-times"></i>
+            <h3>No appointments found</h3>
+            <p>When patients book appointments, they will appear here.</p>
+        </div>
+    </div>
+
+    <!-- Modal for viewing details -->
+    <div class="modal" id="detailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Appointment Details</h2>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Details will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+        
+        // Your Firebase Config (same as index.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBu8DgF1uukkdRwfaJh3g0Ox1MmM6iI1fw",
+            authDomain: "appointmentwebsite-6fe83.firebaseapp.com",
+            projectId: "appointmentwebsite-6fe83",
+            storageBucket: "appointmentwebsite-6fe83.firebasestorage.app",
+            messagingSenderId: "407793425348",
+            appId: "1:407793425348:web:b62915edeb2fe5fcc26291",
+            measurementId: "G-CY8X9E4E3G"
+        };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if logged in
+            if (localStorage.getItem('adminLoggedIn') !== 'true') {
+                window.location.href = 'admin-login.html';
+            }
+            
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            
+            // Elements
+            const logoutBtn = document.getElementById('logoutBtn');
+            const appointmentsTable = document.getElementById('appointmentsTable');
+            const emptyState = document.getElementById('emptyState');
+            const searchInput = document.getElementById('searchInput');
+            const statusFilter = document.getElementById('statusFilter');
+            const doctorFilter = document.getElementById('doctorFilter');
+            const detailsModal = document.getElementById('detailsModal');
+            const closeModal = document.getElementById('closeModal');
+            const modalBody = document.getElementById('modalBody');
+            const notification = document.getElementById('notification');
+            
+            const totalCount = document.getElementById('totalCount');
+            const confirmedCount = document.getElementById('confirmedCount');
+            const pendingCount = document.getElementById('pendingCount');
+            const cancelledCount = document.getElementById('cancelledCount');
+            
+            let appointments = [];
+            
+            // Logout
+            logoutBtn.addEventListener('click', function() {
+                localStorage.removeItem('adminLoggedIn');
+                window.location.href = 'admin-login.html';
+            });
+            
+            // Load appointments
+            async function loadAppointments() {
+                try {
+                    const q = query(collection(db, "appointments"), orderBy("createdAt", "desc"));
+                    const querySnapshot = await getDocs(q);
+                    
+                    appointments = [];
+                    let total = 0, confirmed = 0, pending = 0, cancelled = 0;
+                    
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        appointments.push({
+                            id: doc.id,
+                            ...data
+                        });
+                        
+                        total++;
+                        if (data.status === 'confirmed') confirmed++;
+                        if (data.status === 'pending') pending++;
+                        if (data.status === 'cancelled') cancelled++;
+                    });
+                    
+                    // Update counters
+                    totalCount.textContent = total;
+                    confirmedCount.textContent = confirmed;
+                    pendingCount.textContent = pending;
+                    cancelledCount.textContent = cancelled;
+                    
+                    // Render table
+                    renderTable();
+                    
+                } catch (error) {
+                    console.error('Error loading appointments:', error);
+                    showNotification('❌ Error loading data', 'error');
+                }
+            }
+            
+            // Render table
+            function renderTable() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const statusTerm = statusFilter.value;
+                const doctorTerm = doctorFilter.value;
+                
+                let filtered = appointments.filter(app => {
+                    // Search filter
+                    const matchesSearch = 
+                        app.fullName?.toLowerCase().includes(searchTerm) ||
+                        app.email?.toLowerCase().includes(searchTerm) ||
+                        app.appointmentId?.toLowerCase().includes(searchTerm) ||
+                        app.phone?.includes(searchTerm);
+                                          // Status filter
+                    const matchesStatus = 
+                        statusTerm === 'all' || app.status === statusTerm;
+                    
+                    // Doctor filter
+                    const matchesDoctor = 
+                        doctorTerm === 'all' || app.doctor === doctorTerm;
+                    
+                    return matchesSearch && matchesStatus && matchesDoctor;
+                });
+                
+                // Clear table
+                appointmentsTable.innerHTML = '';
+                
+                // Show empty state
+                if (filtered.length === 0) {
+                    emptyState.style.display = 'block';
+                    return;
+                } else {
+                    emptyState.style.display = 'none';
+                }
+                
+                // Add rows
+                filtered.forEach(app => {
+                    const row = document.createElement('tr');
+                    
+                    const doctorNames = {
+                        'dr-sharma': 'Dr. Rajesh Sharma',
+                        'dr-patel': 'Dr. Priya Patel',
+                        'dr-kumar': 'Dr. Amit Kumar',
+                        'dr-singh': 'Dr. Neha Singh'
+                    };
+                    
+                    const formattedDate = new Date(app.appointmentDate).toLocaleDateString('en-US', {
+                        weekday: 'short',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    
+                    row.innerHTML = `
+                        <td><strong>${app.appointmentId}</strong></td>
+                        <td>${app.fullName}</td>
+                        <td>${app.email}</td>
+                        <td>${app.phone}</td>
+                        <td>${doctorNames[app.doctor] || app.doctor}</td>
+                        <td>${formattedDate}<br><small>${app.appointmentTime}</small></td>
+                        <td>
+                            <span class="status-badge status-${app.status}">
+                                ${app.status}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn btn-view" onclick="viewDetails('${app.id}')">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                ${app.status !== 'confirmed' ? `
+                                    <button class="action-btn btn-confirm" onclick="updateStatus('${app.id}', 'confirmed')">
+                                        <i class="fas fa-check"></i> Confirm
+                                    </button>
+                                ` : ''}
+                                ${app.status !== 'cancelled' ? `
+                                    <button class="action-btn btn-cancel" onclick="updateStatus('${app.id}', 'cancelled')">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    `;
+                    
+                    appointmentsTable.appendChild(row);
+                });
+            }
+            
+            // View details
+            window.viewDetails = function(appointmentId) {
+                const appointment = appointments.find(a => a.id === appointmentId);
+                if (!appointment) return;
+                
+                const doctorNames = {
+                    'dr-sharma': 'Dr. Rajesh Sharma (Cardiologist)',
+                    'dr-patel': 'Dr. Priya Patel (Dermatologist)',
+                    'dr-kumar': 'Dr. Amit Kumar (Orthopedic)',
+                    'dr-singh': 'Dr. Neha Singh (Pediatrician)'
+                };
+                
+                modalBody.innerHTML = `
+                    <p><strong>Appointment ID:</strong> ${appointment.appointmentId}</p>
+                    <p><strong>Patient Name:</strong> ${appointment.fullName}</p>
+                    <p><strong>Email:</strong> ${appointment.email}</p>
+                    <p><strong>Phone:</strong> ${appointment.phone}</p>
+                    <p><strong>Age:</strong> ${appointment.age}</p>
+                    <p><strong>Gender:</strong> ${appointment.gender}</p>
+                    <p><strong>Address:</strong> ${appointment.address}</p>
+                    <p><strong>Doctor:</strong> ${doctorNames[appointment.doctor] || appointment.doctor}</p>
+                    <p><strong>Appointment Date:</strong> ${new Date(appointment.appointmentDate).toDateString()}</p>
+                    <p><strong>Appointment Time:</strong> ${appointment.appointmentTime}</p>
+                    <p><strong>Medical Problem:</strong> ${appointment.problem}</p>
+                    <p><strong>Additional Notes:</strong> ${appointment.notes}</p>
+                    <p><strong>Status:</strong> <span class="status-badge status-${appointment.status}">${appointment.status}</span></p>
+                    <p><strong>Created On:</strong> ${new Date(appointment.createdAt).toLocaleString()}</p>
+                `;
+                
+                detailsModal.style.display = 'flex';
+            };
+            
+            // Update status
+            window.updateStatus = async function(appointmentId, newStatus) {
+                const action = newStatus === 'confirmed' ? 'confirm' : 'cancel';
+                if (!confirm(`Are you sure you want to ${action} this appointment?`)) return;
+                
+                try {
+                    await updateDoc(doc(db, "appointments", appointmentId), {
+                        status: newStatus,
+                        updatedAt: new Date().toISOString()
+                    });
+                    
+                    showNotification(`✅ Appointment ${action}ed successfully!`, 'success');
+                    
+                    // Reload appointments
+                    await loadAppointments();
+                    
+                } catch (error) {
+                    console.error('Error updating status:', error);
+                    showNotification('❌ Error updating appointment', 'error');
+                }
+            };
+            
+            // Close modal
+            closeModal.addEventListener('click', function() {
+                detailsModal.style.display = 'none';
+            });
+            
+            // Close modal on outside click
+            detailsModal.addEventListener('click', function(e) {
+                if (e.target === detailsModal) {
+                    detailsModal.style.display = 'none';
+                }
+            });
+            
+            // Event listeners for filters
+            searchInput.addEventListener('input', renderTable);
+            statusFilter.addEventListener('change', renderTable);
+            doctorFilter.addEventListener('change', renderTable);
+            
+            // Show notification
+            function showNotification(message, type) {
+                notification.textContent = message;
+                notification.className = `notification ${type} show`;
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Load initial data
+            loadAppointments();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(loadAppointments, 30000);
+        });
+    </script>
+</body>
+</html>                       
+                   
